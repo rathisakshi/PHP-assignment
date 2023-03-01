@@ -1,5 +1,5 @@
 <?php
-function bubble_Sort_self($arr)
+function bubble_Sort($arr)
 {
     $arr_length = count($arr);
     for ($i = 0; $i < $arr_length; $i++) {
@@ -13,7 +13,6 @@ function bubble_Sort_self($arr)
     }
     return $arr;
 }
-$arr = array(4,2,2,0,-1,0,2,2);
-echo implode(" ",(bubble_Sort_self($arr)));
-
+$arr = array(3, 0, 2, 5, -1, 4, 1);
+print_r(bubble_Sort($arr));
 ?>
