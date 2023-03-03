@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload PHP File</title>
+  <style>
+  body{
+    margin:1% 1% 1% 1%;
+  }
+  table{
+    margin:2% 2% 2% 2%;
+  }
+  .displaypage form{
+    text-align: center;
+   
+  }
+  .displaypage{
+    margin: 15% 0% 0% 30%;
+    background-color: lightcyan;
+    width:40%;
+    font-size: larger;
+    padding: 1% 1% 1% 1%;
+    border-style: groove;
+  }
+  h1{
+    text-align:center ;
+  }
+  .displaypage input{
+  border: none;
+  color: black;
+  padding: 4px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  
+  }
+
+  </style>
+</head>
+<body>
+  <div class = "displaypage">
+  <h1>Upload CSV File</h1>
+  <form action="Question1.php" method="POST" enctype="multipart/form-data">
+    <input type="file" id="php-file" name="php-file" accept=".csv" />
+    <input type="submit" name="submit" value="Upload" />
+  </form>
+</div>
+</body>
+</html>
+

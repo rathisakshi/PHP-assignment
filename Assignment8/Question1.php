@@ -1,31 +1,76 @@
-<?php
-class RssFeed {
-    private $url;
+<!DOCTYPE html>
+<html lang="en">
 
-    public function __construct($url) {
-        $this->url = $url;
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
 
-    public function getFeed() {
-        libxml_use_internal_errors(true);
+<body>
+    <style>
+        body{
+            text-align: center;
+            
+            margin: 4% 10% 4% 10% ;
 
-        $rss_feed = simplexml_load_file($this->url);
-
-        if ($rss_feed === false) {
-            echo "Failed loading RSS feed\n";
-            foreach(libxml_get_errors() as $error) {
-                echo "\t", $error->message;
-            }
-        } else {
-            echo "<pre>";
-            print_r($rss_feed);
-            echo "</pre>";
         }
+        .describe{
+            width: 100%;
+
+        }
+        .item img{
+            width: 100%;
+            height: 500px;
+
+        }
+        </style>
+
+</body>
+
+</html>
+<?php
+class rssfeed
+{
+    public $url;
+    function __construct()
+    {
+        $this->url = $_POST["url"];
     }
+    function printrss()
+    {
+        $feedArr = simplexml_load_file($this->url);
+        if (isset($feedArr->channel)) {
+            $title = $feedArr->channel->title;
+            echo "<div class='head'>";
+            echo "<h1>".$title."</h1>";
+            echo "<hr>";
+            echo "</div>";
+            foreach ($feedArr->channel->item as $item) {
+                $link = (string)$item->link;
+                $description = (string)$item->description;
+                $title1= $item->title;
+
+                echo "<div class='item'";
+                echo "<a href ='" . $link . "'><h2>" . $title1 . "</a></h2>";
+                echo "<hr>";
+                echo "<div = 'describe'>";
+                echo "<p>" . $description . "</p>";
+                echo "</div>";
+                echo "</div>";
+                echo "<hr>";
+                
+            }
+
+        }
+        else{
+            echo "Hey User! This is an invalid RSS feed , enter a valid one";
+        }
+
+    }
+
 }
-
-$url = $_POST['rssurl'];
-$rss = new RssFeed($url);
-$rss->getFeed();
-
+$url = new rssfeed;
+$url->printrss();
 ?>
