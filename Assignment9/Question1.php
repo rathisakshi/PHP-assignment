@@ -1,102 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
+class FileUploader
+{
+    private $phpFile;
+    private $phpFileTmp;
 
-<body>
-  <style>
-    body {
-      margin: 3% 3% 3% 3%;
-      text-align: center;
-
-    }
-
-    table {
-      width: 100%;
-      margin-top: 3%;
-
-    }
-
-    table,
-    th,
-    td {
-      border: 1px solid;
-      text-align: center;
-    }
-
-    tr:nth-child(even) {
-      background-color: lavenderblush;
-    }
-
-    h1 {
-      margin-top: 5%;
-      color: darkgreen;
-      padding: 2%;
-    }
-
-    </style>
-  </body>
-    </html>
-    <?php
-
-    class FileUploader
+    public function __construct($phpFile, $phpFileTmp)
     {
-      private $phpFile;
-      private $phpFileTmp;
-
-      public function __construct($phpFile, $phpFileTmp)
-      {
         $this->phpFile = $phpFile;
         $this->phpFileTmp = $phpFileTmp;
-      }
+    }
 
-      public function displayTable()
-      {
-        echo '<table border="1">';
-        $start_row = 1;
+    public function displayTable()
+{
+    $destination = "upload/" . basename($this->phpFile);
+    if (move_uploaded_file($this->phpFile, $destination)) {
+        $this->phpFileTmp = $destination;
+        echo "<h1>"."UPDATED CSV FILE"."</h1>";
+        echo '<table>';
         if (($csv_file = fopen($this->phpFileTmp, "r")) !== FALSE) {
-          while (($read_data = fgetcsv($csv_file, 1000, ",")) !== FALSE) {
-            $column_count = count($read_data);
-            echo '<tr>';
-            $start_row++;
-            for ($c = 0; $c < $column_count; $c++) {
-              echo "<td>" . $read_data[$c] . "</td>";
+            while (($read_data = fgetcsv($csv_file, 1000, ",")) !== FALSE) {
+                $column_count = count($read_data);
+                echo '<tr>';
+                for ($c = 0; $c < $column_count; $c++) {
+                    echo "<td>".$read_data[$c] . "</td>";
+                }
+                echo '</tr>';
             }
-            echo '</tr>';
-          }
-          fclose($csv_file);
+            fclose($csv_file);
         }
         echo '</table>';
-      }
+    } 
+}
 
-      public function updateCsv($newData)
-      {
-        $fp = fopen($this->phpFileTmp, 'a');
-        fputcsv($fp, $newData);
-        fclose($fp);
-      }
+
+    public function updateCsv()
+    {
+        if (($handle = fopen($this->phpFileTmp, "r")) !== FALSE) {
+            $updatedRows = array();
+
+            while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                array_unshift($row, "New Column");
+                $updatedRows[] = $row;
+            }
+            array_pop($updatedRows);
+            fclose($handle);
+            if (($handle = fopen($this->phpFileTmp, "w")) !== FALSE) {
+                array_unshift($updatedRows, "New Column");
+                foreach ($updatedRows as $row) {
+                    fputcsv($handle, $row);
+                }
+                fclose($handle);
+            } else {
+                echo "Error opening CSV file for writing!";
+            }
+        } else {
+            echo "Error opening CSV file for reading!";
+        }
     }
 
-    if (isset($_POST['submit'])) {
-      $phpFile = $_FILES['php-file']['name'];
-      // var_dump($phpFile);
-      $phpFileTmp = $_FILES['php-file']['tmp_name'];
-      echo "<h1>CSV File</h1>";
 
-      $fileUploader = new FileUploader($phpFile, $phpFileTmp);
-      $fileUploader->displayTable();
-     
+public function downloadCsv()
+{
+    $url = $this->phpFileTmp;
+    $file_name = basename($this->phpFile);
 
-      $newData = array(6, 3, 1, 'N', 0, 1, 1, 'W');
-      $fileUploader->updateCsv($newData);
+    $info = pathinfo($file_name);
+    if ($info['extension'] == 'csv') {
 
-      $fileUploader = new FileUploader($phpFile, $phpFileTmp);
-      $fileUploader->displayTable();
+        header("Content-Description: File Transfer");
+        header("Content-Type: text/csv");
+        header("Content-Disposition: attachment; filename=\"". $file_name . "\"");
 
+        readfile($url);
+    } else {
+        echo "Sorry, that's not a CSV file!!!";
     }
-    ?>
+
+}
+}
+
+// }
+
+if (isset($_POST['submit'])) {
+    $phpFile = $_FILES['php-file']['name'];
+    $phpFileTmp = $_FILES['php-file']['tmp_name'];
+
+    $fileUploader = new FileUploader($phpFile, $phpFileTmp);
+    $fileUploader->updateCsv();
+
+    $fileUploader = new FileUploader($phpFile, $phpFileTmp);
+    $fileUploader->displayTable();
+
+    $fileUploader = new FileUploader($phpFile, $phpFileTmp);
+    $fileUploader->downloadCsv();
+}
